@@ -14,7 +14,7 @@ interface Company {
 export function XBRL() {
   const [company, setCompany] = React.useState<Company | null>(null);
   return (
-    <div className="flex flex-col min-h-screen min-w-[1240px]">
+    <div className="flex flex-col min-h-screen min-w-[1400px]">
       <header className="border-b">
         <div className="container px-4 py-2 md:py-4 lg:py-6">
           <div className="flex items-center space-x-4">
@@ -44,20 +44,29 @@ export function XBRL() {
 
 function CompanyInfo({ company }: { company: Company | null }) {
   if (company === null) return <></>;
+  const cikPadded = String(company.cik).padStart(10, "0"); // Ensure cik is a string and pad it
   const edgarUrl = `https://www.sec.gov/edgar/browse/?CIK=${company.cik}`;
+  const factAPIUrl = `https://data.sec.gov/api/xbrl/companyfacts/CIK${cikPadded}.json`;
   return (
     <div className="grid gap-2">
       <h2 className="font-semibold">{company.name}</h2>
-      <p className="text-sm">
-        Central Index Key (CIK): {String(company.cik).padStart(10, "0")}
-      </p>
+      <p className="text-sm">Central Index Key (CIK): {company.cik}</p>
       <div>
-        EDGAR page:{" "}
+        EDGAR page :{" "}
         <a
           href={edgarUrl}
           className="text-blue-500 no-underline hover:text-blue-700"
         >
           {edgarUrl}
+        </a>
+      </div>
+      <div>
+        SEC XBRL Fact API:{" "}
+        <a
+          href={factAPIUrl}
+          className="text-blue-500 no-underline hover:text-blue-700"
+        >
+          {factAPIUrl}
         </a>
       </div>
     </div>
@@ -193,37 +202,39 @@ function XbrlUnitsTable({ units }: FactsProps) {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {unitData.sort((a, b) => b.end.localeCompare(a.end)).map((unit: FactUnit) => (
-                <tr key={unit.accn}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {unit.val}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {unitType || "N/A"}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {unit.end}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {unit.accn}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {unit.fy}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {unit.fp}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {unit.form}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {unit.filed}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {unit.frame || "N/A"}
-                  </td>
-                </tr>
-              ))}
+              {unitData
+                .sort((a, b) => b.end.localeCompare(a.end))
+                .map((unit: FactUnit) => (
+                  <tr key={unit.accn}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {unit.val}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {unitType || "N/A"}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {unit.end}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {unit.accn}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {unit.fy}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {unit.fp}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {unit.form}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {unit.filed}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {unit.frame || "N/A"}
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>
