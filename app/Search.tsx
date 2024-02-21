@@ -1,21 +1,40 @@
 import React, { useState, useMemo, useRef } from "react";
 import cikEntityPairs from "../data/cik_entity_pairs.json";
 
-const options: { value: string; label: string }[] = [];
+interface Option {
+  value: string;
+  label: string;
+}
+
+const options: Option[] = [];
 for (const [cik, name] of cikEntityPairs) {
   options.push({ value: cik, label: name } as any);
 }
 
-export function Search({ value, setValue }: any) {
-  const [searchTerm, setSearchTerm] = useState('');
+interface Company {
+  cik: string;
+  name: string;
+}
+
+export function Search({
+  entity,
+  setEntity,
+}: {
+  entity: Company | null;
+  setEntity: React.Dispatch<React.SetStateAction<Company | null>>;
+}) {
+  const [searchTerm, setSearchTerm] = useState("");
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
 
   // Filter options based on search term
   const filteredOptions = useMemo(() => {
     if (!searchTerm.trim()) return [];
-    return options.filter(({ label }) =>
-      label.toLowerCase().includes(searchTerm.toLowerCase())
-    ).slice(0, 50); // Limit the number of displayed options for performance
+    return options
+      .filter(({ label }) =>
+        label.toLowerCase().includes(searchTerm.toLowerCase())
+      )
+      .sort((a, b) => a.label.localeCompare(b.label)) // Sort alphabetically by label
+      .slice(0, 20); // Limit the number of displayed options for performance
   }, [searchTerm]);
 
   return (
@@ -36,12 +55,12 @@ export function Search({ value, setValue }: any) {
         className="p-2 border border-gray-300 rounded-md w-full"
       />
       {isDropdownVisible && filteredOptions.length > 0 && (
-        <ul className="absolute z-10 max-h-60 overflow-auto mt-1 w-full border border-gray-200 rounded-md bg-white shadow-md top-full">
+        <ul className="absolute z-10 max-h-80 overflow-auto mt-1 w-full border border-gray-200 rounded-md bg-white shadow-md top-full">
           {filteredOptions.map(({ value, label }) => (
             <li
               key={value}
               onClick={() => {
-                setValue(value); // Assuming setValue is meant to set the selected value
+                setEntity({ cik: value, name: label }); // Assuming setValue is meant to set the selected value
                 setSearchTerm(label); // Show the selected label in input
                 setIsDropdownVisible(false);
               }}

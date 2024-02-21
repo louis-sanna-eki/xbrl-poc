@@ -6,11 +6,15 @@
 import { Search } from "./Search";
 import React from "react";
 
+interface Company {
+  cik: string;
+  name: string;
+}
 
 export function XBRL() {
-  const [value, setValue] = React.useState("");
+  const [company, setCompany] = React.useState<Company | null>(null);
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen min-w-[1240px]">
       <header className="border-b">
         <div className="container px-4 py-2 md:py-4 lg:py-6">
           <div className="flex items-center space-x-4">
@@ -22,22 +26,15 @@ export function XBRL() {
             </div>
             <div className="flex-1">
               <div className="w-full m-auto rounded-lg">
-                <Search value={value} setValue={setValue} />
+                <Search entity={company} setEntity={setCompany} />
               </div>
             </div>
           </div>
         </div>
       </header>
       <main className="flex-1 py-4">
-        <div className="container grid gap-4 px-4 text-sm md:gap-8 md:px-6">
-          <div className="grid gap-2">
-            <h2 className="font-semibold">Acme Inc</h2>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              ACME Inc is a leading provider of innovative products and
-              solutions in the technology industry. Their stock symbol is ACME,
-              and they operate in the software and hardware industry.
-            </p>
-          </div>
+        <div className="container grid gap-4 px-4 text-sm md:gap-8 md:px-6 min-w-full">
+          <CompanyInfo company={company} />
           <div className="border rounded-lg overflow-auto max-h-[400px]">
             <table className="w-full text-left text-sm">
               <thead>
@@ -73,6 +70,26 @@ export function XBRL() {
           </div>
         </div>
       </main>
+    </div>
+  );
+}
+
+function CompanyInfo({ company }: { company: Company | null }) {
+  if (company === null) return <></>;
+  const edgarUrl = `https://www.sec.gov/edgar/browse/?CIK=${company.cik}`;
+  return (
+    <div className="grid gap-2">
+      <h2 className="font-semibold">{company.name}</h2>
+      <p className="text-sm">Central Index Key (CIK): {company.cik}</p>
+      <div>
+        EDGAR page:{" "}
+        <a
+          href={edgarUrl}
+          className="text-blue-500 no-underline hover:text-blue-700"
+        >
+          {edgarUrl}
+        </a>
+      </div>
     </div>
   );
 }
