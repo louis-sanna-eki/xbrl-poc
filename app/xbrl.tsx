@@ -193,7 +193,7 @@ function XbrlUnitsTable({ units }: FactsProps) {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {unitData.map((unit: FactUnit) => (
+              {unitData.sort((a, b) => b.end.localeCompare(a.end)).map((unit: FactUnit) => (
                 <tr key={unit.accn}>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {unit.val}
