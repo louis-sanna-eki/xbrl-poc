@@ -79,6 +79,7 @@ function CompanyFacts({ company }: { company: Company | null }) {
   useEffect(() => {
     async function fetchData() {
       if (company === null) return;
+      setCompanyFacts(null)
       const res = await fetch(`/api/companyfacts?cik=${company.cik}`);
       const data = await res.json();
       setCompanyFacts(data.facts);
