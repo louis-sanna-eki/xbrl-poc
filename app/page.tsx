@@ -1,4 +1,4 @@
-import { XBRL } from "@/components/xbrl";
+import { XBRL } from "@/app/xbrl";
 
 export default function Home() {
   return (
