@@ -10,9 +10,7 @@ export default async function handler(
   try {
     const cikPadded = String(cik).padStart(10, '0'); // Ensure cik is a string and pad it
     const apiUrl = `https://data.sec.gov/api/xbrl/companyfacts/CIK${cikPadded}.json`;
-    console.log(apiUrl);
     const apiRes = await fetch(apiUrl);
-    console.log("apiRes", apiRes);
     const data = await apiRes.json();
 
     // Check if the external API returned a non-200 response

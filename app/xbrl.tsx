@@ -36,39 +36,6 @@ export function XBRL() {
         <div className="container grid gap-4 px-4 text-sm md:gap-8 md:px-6 min-w-full">
           <CompanyInfo company={company} />
           <CompanyFacts company={company} />
-          <div className="border rounded-lg overflow-auto max-h-[400px]">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-b">
-                  <th className="px-2 py-2">Name</th>
-                  <th className="px-2 py-2">Value</th>
-                  <th className="px-2 py-2">Additional Information</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="border-b">
-                  <td className="px-2 py-2">Net Income</td>
-                  <td className="px-2 py-2">$1,000,000</td>
-                  <td className="px-2 py-2">Fiscal Year 2022</td>
-                </tr>
-                <tr className="border-b bg-gray-100 dark:bg-gray-800">
-                  <td className="px-2 py-2">Revenue</td>
-                  <td className="px-2 py-2">$5,000,000</td>
-                  <td className="px-2 py-2">Fiscal Year 2022</td>
-                </tr>
-                <tr className="border-b">
-                  <td className="px-2 py-2">Total Assets</td>
-                  <td className="px-2 py-2">$10,000,000</td>
-                  <td className="px-2 py-2">Fiscal Year 2022</td>
-                </tr>
-                <tr className="border-b bg-gray-100 dark:bg-gray-800">
-                  <td className="px-2 py-2">Total Liabilities</td>
-                  <td className="px-2 py-2">$3,000,000</td>
-                  <td className="px-2 py-2">Fiscal Year 2022</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
         </div>
       </main>
     </div>
@@ -81,7 +48,9 @@ function CompanyInfo({ company }: { company: Company | null }) {
   return (
     <div className="grid gap-2">
       <h2 className="font-semibold">{company.name}</h2>
-      <p className="text-sm">Central Index Key (CIK): {company.cik}</p>
+      <p className="text-sm">
+        Central Index Key (CIK): {String(company.cik).padStart(10, "0")}
+      </p>
       <div>
         EDGAR page:{" "}
         <a
@@ -121,7 +90,7 @@ function XbrlFacts({ facts }: any) {
       {Object.entries(facts).map(([key, value]: any[]) => (
         <article key={key} className="space-y-2">
           <h2 className="text-xl font-bold text-gray-900">{key}</h2>
-          {Object.values(value).map(({ label, description }: any) => (
+          {Object.values(value).map(({ label, description, units }: any) => (
             <div className="bg-white shadow sm:rounded-lg" key={label}>
               <div className="px-4 py-5 sm:p-6">
                 <h3 className="text-lg leading-6 font-medium text-gray-900">
@@ -131,11 +100,135 @@ function XbrlFacts({ facts }: any) {
                   {description}
                 </p>
               </div>
+              <XbrlUnitsTable units={units} />
             </div>
           ))}
         </article>
       ))}
     </section>
+  );
+}
+
+interface FactUnit {
+  end: string;
+  val: number;
+  accn: string;
+  fy: number;
+  fp: string;
+  form: string;
+  filed: string;
+  frame?: string;
+}
+
+interface UnitsProp {
+  [unitType: string]: FactUnit[]; // Supports dynamic unit types
+}
+
+interface FactsProps {
+  units: UnitsProp;
+}
+
+function XbrlUnitsTable({ units }: FactsProps) {
+  return (
+    <div>
+      {Object.entries(units).map(([unitType, unitData]) => (
+        <div key={unitType} className="mb-8 overflow-x-auto">
+          <table className="min-w-full mt-3 divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Value
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Unit
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  End Date
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  ACCN
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Fiscal Year
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Fiscal Period
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Form
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Filed Date
+                </th>
+                <th
+                  scope="col"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                >
+                  Frame (optional)
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {unitData.map((unit: FactUnit) => (
+                <tr key={unit.accn}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {unit.val}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {unitType || "N/A"}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {unit.end}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {unit.accn}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {unit.fy}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {unit.fp}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {unit.form}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {unit.filed}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {unit.frame || "N/A"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ))}
+    </div>
   );
 }
 
