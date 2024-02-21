@@ -4,7 +4,7 @@
  * @see https://v0.dev/t/KWot8TTw4Qb
  */
 import { Search } from "./Search";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 interface Company {
   cik: string;
@@ -35,6 +35,7 @@ export function XBRL() {
       <main className="flex-1 py-4">
         <div className="container grid gap-4 px-4 text-sm md:gap-8 md:px-6 min-w-full">
           <CompanyInfo company={company} />
+          <CompanyFacts company={company} />
           <div className="border rounded-lg overflow-auto max-h-[400px]">
             <table className="w-full text-left text-sm">
               <thead>
@@ -92,6 +93,26 @@ function CompanyInfo({ company }: { company: Company | null }) {
       </div>
     </div>
   );
+}
+
+function CompanyFacts({ company }: { company: Company | null }) {
+  const [companyFacts, setCompanyFacts] = useState(null);
+
+  useEffect(() => {
+    async function fetchData() {
+      if (company === null) return;
+      const res = await fetch(`/api/companyfacts?cik=${company.cik}`);
+      const data = await res.json();
+      setCompanyFacts(data);
+    }
+    fetchData();
+  }, [company]); // Empty dependency array means this effect runs once on mount
+
+  if (company === null) return;
+  if (!companyFacts) return <div>Loading...</div>;
+
+  // Render your component with companyFacts data
+  return <div>{JSON.stringify(companyFacts)}</div>;
 }
 
 function BarChartIcon(props: any) {
