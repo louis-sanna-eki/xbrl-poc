@@ -1,77 +1,57 @@
-"use client";
-
-import * as React from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
-
+import React, { useState, useMemo, useRef } from "react";
 import cikEntityPairs from "../data/cik_entity_pairs.json";
-
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 
 const options: { value: string; label: string }[] = [];
 for (const [cik, name] of cikEntityPairs) {
-  options.push({ value: cik, label: name } as { value: string; label: string });
+  options.push({ value: cik, label: name } as any);
 }
 
-export function Search({ value, setValue }: { value: string; setValue: any }) {
-  const [open, setOpen] = React.useState(false);
+export function Search({ value, setValue }: any) {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isDropdownVisible, setIsDropdownVisible] = useState(false);
 
-  console.log(cikEntityPairs);
-  console.log(options);
+  // Filter options based on search term
+  const filteredOptions = useMemo(() => {
+    if (!searchTerm.trim()) return [];
+    return options.filter(({ label }) =>
+      label.toLowerCase().includes(searchTerm.toLowerCase())
+    ).slice(0, 50); // Limit the number of displayed options for performance
+  }, [searchTerm]);
+
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="justify-between w-full rounded-lg border m-auto"
-        >
-          {value
-            ? options.find((option) => option.value === value)?.label
-            : "Select company..."}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-full p-0" style={{ minWidth: "950px" }}>
-        <Command>
-          <CommandInput placeholder="Search company..." />
-          <CommandEmpty>No framework found.</CommandEmpty>
-          <CommandGroup>
-            {/* TODO: find implem that scales */}
-            {options.slice(0, 10).map((option) => (
-              <CommandItem
-                key={option.value}
-                value={option.value}
-                onSelect={(currentValue) => {
-                  setValue(currentValue === value ? "" : currentValue);
-                  setOpen(false);
-                }}
-              >
-                <Check
-                  className={cn(
-                    "mr-2 h-4 w-4",
-                    value === option.value ? "opacity-100" : "opacity-0"
-                  )}
-                />
-                {option.label}
-              </CommandItem>
-            ))}
-          </CommandGroup>
-        </Command>
-      </PopoverContent>
-    </Popover>
+    <div className="relative flex flex-col items-center justify-center w-full">
+      <input
+        type="text"
+        placeholder="Search for a company..."
+        value={searchTerm}
+        onChange={(e) => {
+          setSearchTerm(e.target.value);
+          setIsDropdownVisible(true);
+        }}
+        onFocus={() => setIsDropdownVisible(true)}
+        onBlur={() => {
+          // Delay hiding dropdown to allow click event to register on options
+          setTimeout(() => setIsDropdownVisible(false), 200);
+        }}
+        className="p-2 border border-gray-300 rounded-md w-full"
+      />
+      {isDropdownVisible && filteredOptions.length > 0 && (
+        <ul className="absolute z-10 max-h-60 overflow-auto mt-1 w-full border border-gray-200 rounded-md bg-white shadow-md top-full">
+          {filteredOptions.map(({ value, label }) => (
+            <li
+              key={value}
+              onClick={() => {
+                setValue(value); // Assuming setValue is meant to set the selected value
+                setSearchTerm(label); // Show the selected label in input
+                setIsDropdownVisible(false);
+              }}
+              className="p-2 hover:bg-gray-100 cursor-pointer"
+            >
+              {label}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }
