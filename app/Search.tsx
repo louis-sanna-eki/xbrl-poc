@@ -3,6 +3,8 @@
 import * as React from "react";
 import { Check, ChevronsUpDown } from "lucide-react";
 
+import cikEntityPairs from "../data/cik_entity_pairs.json";
+
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,32 +20,16 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-const frameworks = [
-  {
-    value: "next.js",
-    label: "Next.js",
-  },
-  {
-    value: "sveltekit",
-    label: "SvelteKit",
-  },
-  {
-    value: "nuxt.js",
-    label: "Nuxt.js",
-  },
-  {
-    value: "remix",
-    label: "Remix",
-  },
-  {
-    value: "astro",
-    label: "Astro",
-  },
-];
+const options: { value: string; label: string }[] = [];
+for (const [cik, name] of cikEntityPairs) {
+  options.push({ value: cik, label: name } as { value: string; label: string });
+}
 
 export function Search({ value, setValue }: { value: string; setValue: any }) {
   const [open, setOpen] = React.useState(false);
 
+  console.log(cikEntityPairs);
+  console.log(options);
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -54,7 +40,7 @@ export function Search({ value, setValue }: { value: string; setValue: any }) {
           className="justify-between w-full rounded-lg border m-auto"
         >
           {value
-            ? frameworks.find((framework) => framework.value === value)?.label
+            ? options.find((option) => option.value === value)?.label
             : "Select company..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
@@ -64,10 +50,11 @@ export function Search({ value, setValue }: { value: string; setValue: any }) {
           <CommandInput placeholder="Search company..." />
           <CommandEmpty>No framework found.</CommandEmpty>
           <CommandGroup>
-            {frameworks.map((framework) => (
+            {/* TODO: find implem that scales */}
+            {options.slice(0, 10).map((option) => (
               <CommandItem
-                key={framework.value}
-                value={framework.value}
+                key={option.value}
+                value={option.value}
                 onSelect={(currentValue) => {
                   setValue(currentValue === value ? "" : currentValue);
                   setOpen(false);
@@ -76,10 +63,10 @@ export function Search({ value, setValue }: { value: string; setValue: any }) {
                 <Check
                   className={cn(
                     "mr-2 h-4 w-4",
-                    value === framework.value ? "opacity-100" : "opacity-0"
+                    value === option.value ? "opacity-100" : "opacity-0"
                   )}
                 />
-                {framework.label}
+                {option.label}
               </CommandItem>
             ))}
           </CommandGroup>
