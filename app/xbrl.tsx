@@ -103,7 +103,7 @@ function CompanyFacts({ company }: { company: Company | null }) {
       if (company === null) return;
       const res = await fetch(`/api/companyfacts?cik=${company.cik}`);
       const data = await res.json();
-      setCompanyFacts(data);
+      setCompanyFacts(data.facts);
     }
     fetchData();
   }, [company]); // Empty dependency array means this effect runs once on mount
@@ -112,7 +112,31 @@ function CompanyFacts({ company }: { company: Company | null }) {
   if (!companyFacts) return <div>Loading...</div>;
 
   // Render your component with companyFacts data
-  return <div>{JSON.stringify(companyFacts)}</div>;
+  return <XbrlFacts facts={companyFacts}></XbrlFacts>;
+}
+
+function XbrlFacts({ facts }: any) {
+  return (
+    <section className="flex flex-col space-y-4">
+      {Object.entries(facts).map(([key, value]: any[]) => (
+        <article key={key} className="space-y-2">
+          <h2 className="text-xl font-bold text-gray-900">{key}</h2>
+          {Object.values(value).map(({ label, description }: any) => (
+            <div className="bg-white shadow sm:rounded-lg" key={label}>
+              <div className="px-4 py-5 sm:p-6">
+                <h3 className="text-lg leading-6 font-medium text-gray-900">
+                  {label}
+                </h3>
+                <p className="mt-1 max-w-2xl text-sm text-gray-500">
+                  {description}
+                </p>
+              </div>
+            </div>
+          ))}
+        </article>
+      ))}
+    </section>
+  );
 }
 
 function BarChartIcon(props: any) {
